@@ -91,11 +91,41 @@
     });
 
     function processarQRCode(codigo) {
-      // Exemplo de decodificação — ajuste conforme seu padrão
-      const rota = codigo.substring(6, 10);
-      const pre_nota = codigo.substring(10, 16);
-      const regiao_cod = codigo.substring(24, 26);
-      const numero_caixa = codigo.substring(codigo.length - 4);
+  const rota = codigo.substring(6, 10);
+  const pre_nota = codigo.substring(10, 16);
+  const regiao_cod = codigo.substring(24, 26);
+  const numero_caixa = codigo.substring(codigo.length - 4);
+
+  const dados = {
+    qr_code: codigo,
+    rota: rota,
+    pre_nota: pre_nota,
+    regiao_cod: regiao_cod,
+    regiao_nome: regiao_cod === "18" ? "E DIRETA" : "DESCONHECIDA",
+    cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
+    produto: "CO PANTENE 510ML BIOTINAMINA B3",
+    numero_caixa: numero_caixa
+  };
+
+  fetch("/registrar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dados)
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("registro_id").value = data.id;
+    document.getElementById("qr_code_raw").value = dados.qr_code;
+    document.getElementById("cliente").value = dados.cliente;
+    document.getElementById("produto").value = dados.produto;
+    document.getElementById("rota").value = dados.rota;
+    document.getElementById("pre_nota").value = dados.pre_nota;
+    document.getElementById("regiao_nome").value = dados.regiao_nome;
+    document.getElementById("numero_caixa").value = dados.numero_caixa;
+
+    formDados.style.display = "block";
+  });
+}
 
       // Simulação de dados puxados via backend
       const dados = {
@@ -157,31 +187,6 @@
 
     let idSaida = null;
 
-function processarQRCode(dados) {
-    // Simule a extração (você já tem isso)
-    const payload = {
-        qr_code: dados,
-        rota: '001',
-        pre_nota: '1234567',
-        regiao_cod: '18',
-        regiao_nome: 'NORDESTE',
-        cliente: 'Cliente X',
-        produto: 'Produto Y',
-        numero_caixa: '0001'
-    };
-
-    fetch('/registrar', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(data => {
-        idSaida = data.id;
-        document.getElementById('campo-volumes').style.display = 'block';
-    });
-}
-
 function enviarQuantidade() {
       const qtd = document.getElementById('quantidade').value;
       if (!qtd || qtd <= 0) {
@@ -202,3 +207,4 @@ function enviarQuantidade() {
   </script>
 </body>
 </html>
+
