@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resumo da Saída</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Resumo da Saída</h1>
+
+    <h3>Responsável</h3>
+    <p><strong>{{ s.usuario.nome }}</strong></p>
+
+    <h3>Dados do Palete</h3>
+    <table>
+      <tbody>
+        <tr>
+          <td data-label="QR Code Lido"><strong>QR Code:</strong></td>
+          <td>{{ s.qr_code_raw }}</td>
+        </tr>
+        <tr>
+          <td data-label="Cliente"><strong>Cliente:</strong></td>
+          <td>{{ s.cliente }}</td>
+        </tr>
+        <tr>
+          <td data-label="Produto"><strong>Produto:</strong></td>
+          <td>{{ s.produto }}</td>
+        </tr>
+        <tr>
+          <td data-label="Rota"><strong>Rota:</strong></td>
+          <td>{{ s.rota }}</td>
+        </tr>
+        <tr>
+          <td data-label="Pré-nota"><strong>Pré-nota:</strong></td>
+          <td>{{ s.pre_nota }}</td>
+        </tr>
+        <tr>
+          <td data-label="Região"><strong>Região:</strong></td>
+          <td>{{ s.regiao_cod }} - {{ s.regiao_nome }}</td>
+        </tr>
+        <tr>
+          <td data-label="Caixa"><strong>Nº da Caixa:</strong></td>
+          <td>{{ s.numero_caixa }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Horários</h3>
+    <table>
+      <tbody>
+        <tr>
+          <td data-label="Leitura QR Code"><strong>Leitura QR:</strong></td>
+          <td>{{ s.horario_leitura.strftime('%d/%m/%Y %H:%M:%S') if s.horario_leitura }}</td>
+        </tr>
+        <tr>
+          <td data-label="Foto Etiqueta"><strong>Foto Etiqueta:</strong></td>
+          <td>{{ s.horario_foto_1.strftime('%d/%m/%Y %H:%M:%S') if s.horario_foto_1 }}</td>
+        </tr>
+        <tr>
+          <td data-label="Foto Palete"><strong>Foto Palete:</strong></td>
+          <td>{{ s.horario_foto_2.strftime('%d/%m/%Y %H:%M:%S') if s.horario_foto_2 }}</td>
+        </tr>
+        <tr>
+          <td data-label="Confirmação"><strong>Confirmação:</strong></td>
+          <td>{{ s.horario_confirmado.strftime('%d/%m/%Y %H:%M:%S') if s.horario_confirmado }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Fotos</h3>
+    {% if s.foto_etiqueta %}
+      <label>Etiqueta:</label>
+      <img src="{{ url_for('static', filename=s.foto_etiqueta.split('static/')[-1]) }}" class="preview">
+    {% endif %}
+
+    {% if s.foto_palete %}
+      <label>Palete:</label>
+      <img src="{{ url_for('static', filename=s.foto_palete.split('static/')[-1]) }}" class="preview">
+    {% endif %}
+  </div>
+</body>
+</html>

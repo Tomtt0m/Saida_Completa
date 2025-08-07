@@ -1,0 +1,148 @@
+/* Reset e fonte */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fundo e corpo */
+body {
+  background: #f4f7fa;
+  color: #00377B;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Container principal */ 
+.container {
+  background: white;
+  max-width: 500px;
+  width: 95%;
+  padding: 25px 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,55,123,0.15);
+}
+
+.container:hover {
+  box-shadow: 0 12px 30px rgba(0,55,123,0.3);
+}
+
+/* Títulos */
+h1, h2, h3 {
+  color: #00377B;
+  margin-bottom: 15px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* Formulários */
+form {
+  width: 100%;
+  margin-bottom: 25px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="file"],
+select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #00377B;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #00377B;
+  margin-bottom: 20px;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: #0055cc;
+  box-shadow: 0 0 6px #0055ccaa;
+}
+
+/* Botões */
+button, a.button-link {
+  background-color: #00377B;
+  color: #fff;
+  border: none;
+  padding: 12px 25px;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 15px;
+  width: 50%;
+}
+
+button:hover, a.button-link:hover {
+  background-color: #0055cc;
+  box-shadow: 0 6px 12px rgba(0, 55, 123, 0.4);
+}
+
+/* QR Code Container */
+.qr-code-container {
+  width: 100%;
+  margin: 20px 0;
+  border: 2px dashed #00377B;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #f9fbfd;
+}
+
+/* Imagens anexadas */
+img.preview {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Mensagem de erro */
+.error-msg {
+  background-color: #fdecea;
+  color: #dc3545;
+  border-left: 6px solid #dc3545;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Layout responsivo */
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+  }
+}
+
+/* Label customizado */
+label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+  color: #00377B;
+}
+.button {
+  background-color: #00377B;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #0050b3; /* Tom mais claro ao passar o mouse */
+}

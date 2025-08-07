@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saída Completa</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+  <div class="container" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+    <h1>Saída Completa</h1>
+    <p>Olá, <strong>{{ usuario }}</strong></p>
+
+    <button id="start-scan">Registrar Palete Completo</button>
+
+    <div id="qr-reader" class="qr-code-container" style="display: none;"></div>
+
+    <form id="form-dados" style="display: none;" enctype="multipart/form-data">
+      <input type="hidden" name="registro_id" id="registro_id">
+
+      <label>QR Code:</label>
+      <input type="text" id="qr_code_raw" disabled>
+
+      <label>Cliente:</label>
+      <input type="text" id="cliente" disabled>
+
+      <label>Produto:</label>
+      <input type="text" id="produto" disabled>
+
+      <label>Rota:</label>
+      <input type="text" id="rota" disabled>
+
+      <label>Pré-nota:</label>
+      <input type="text" id="pre_nota" disabled>
+
+      <label>Região:</label>
+      <input type="text" id="regiao_nome" disabled>
+
+      <label>Nº da Caixa:</label>
+      <input type="text" id="numero_caixa" disabled>
+
+      
+      <label for="quantidade">Quantidade de Volumes:</label>
+      <input type="number" id="quantidade" disabled>
+      
+
+      <label>Anexar foto da Etiqueta:</label>
+      <input type="file" id="foto_etiqueta" accept="image/*" capture="environment">
+
+      <img id="preview_etiqueta" class="preview" style="display:none;">
+
+      <label>Anexar foto do Palete:</label>
+      <input type="file" id="foto_palete" accept="image/*" capture="environment">
+
+      <img id="preview_palete" class="preview" style="display:none;">
+
+      <button type="button" id="confirmar">Confirmar</button>
+    </form>
+  </div>
+
+  <script>
+    const startScanBtn = document.getElementById("start-scan");
+    const qrReader = document.getElementById("qr-reader");
+    const formDados = document.getElementById("form-dados");
+
+    const previewEtiqueta = document.getElementById("preview_etiqueta");
+    const previewPalete = document.getElementById("preview_palete");
+
+    let scanner;
+
+    startScanBtn.addEventListener("click", () => {
+      qrReader.style.display = "block";
+      scanner = new Html5Qrcode("qr-reader");
+
+      scanner.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: 250
+        },
+        qrCodeMessage => {
+          scanner.stop();
+          qrReader.style.display = "none";
+          processarQRCode(qrCodeMessage);
+        },
+        errorMessage => {
+          // opcional: console.log("Erro leitura", errorMessage);
+        }
+      );
+    });
+
+    function processarQRCode(codigo) {
+      // Exemplo de decodificação — ajuste conforme seu padrão
+      const rota = codigo.substring(6, 10);
+      const pre_nota = codigo.substring(10, 16);
+      const regiao_cod = codigo.substring(24, 26);
+      const numero_caixa = codigo.substring(codigo.length - 4);
+
+      // Simulação de dados puxados via backend
+      const dados = {
+        qr_code: codigo,
+        rota: rota,
+        pre_nota: pre_nota,
+        regiao_cod: regiao_cod,
+        regiao_nome: regiao_cod === "18" ? "E DIRETA" : "DESCONHECIDA",
+        cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
+        produto: "CO PANTENE 510ML BIOTINAMINA B3",
+        numero_caixa: numero_caixa
+      };
+
+      fetch("/registrar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("registro_id").value = data.id;
+        document.getElementById("qr_code_raw").value = dados.qr_code;
+        document.getElementById("cliente").value = dados.cliente;
+        document.getElementById("produto").value = dados.produto;
+        document.getElementById("rota").value = dados.rota;
+        document.getElementById("pre_nota").value = dados.pre_nota;
+        document.getElementById("regiao_nome").value = dados.regiao_nome;
+        document.getElementById("numero_caixa").value = dados.numero_caixa;
+
+        formDados.style.display = "block";
+      });
+    }
+
+    // Pré-visualizar imagens
+    document.getElementById("foto_etiqueta").addEventListener("change", (e) => {
+      previewEtiqueta.src = URL.createObjectURL(e.target.files[0]);
+      previewEtiqueta.style.display = "block";
+    });
+
+    document.getElementById("foto_palete").addEventListener("change", (e) => {
+      previewPalete.src = URL.createObjectURL(e.target.files[0]);
+      previewPalete.style.display = "block";
+    });
+
+    document.getElementById("confirmar").addEventListener("click", () => {
+      const formData = new FormData();
+      const id = document.getElementById("registro_id").value;
+      formData.append("etiqueta", document.getElementById("foto_etiqueta").files[0]);
+      formData.append("palete", document.getElementById("foto_palete").files[0]);
+
+      fetch(`/upload/${id}`, { method: "POST", body: formData })
+        .then(() => {
+          return fetch(`/confirmar/${id}`, { method: "POST" });
+        })
+        .then(() => {
+          window.location.href = `/resumo/${id}`;
+        });
+    });
+
+    let idSaida = null;
+
+function processarQRCode(dados) {
+    // Simule a extração (você já tem isso)
+    const payload = {
+        qr_code: dados,
+        rota: '001',
+        pre_nota: '1234567',
+        regiao_cod: '18',
+        regiao_nome: 'NORDESTE',
+        cliente: 'Cliente X',
+        produto: 'Produto Y',
+        numero_caixa: '0001'
+    };
+
+    fetch('/registrar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        idSaida = data.id;
+        document.getElementById('campo-volumes').style.display = 'block';
+    });
+}
+
+function enviarQuantidade() {
+      const qtd = document.getElementById('quantidade').value;
+      if (!qtd || qtd <= 0) {
+          alert("Informe a quantidade de volumes válida.");
+          return;
+      }
+
+      fetch(`/volumes/${idSaida}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({quantidade: qtd})
+      })
+      .then(res => {
+          document.getElementById('foto-section').style.display = 'block';
+          document.getElementById('campo-volumes').style.display = 'none';
+      });
+  }
+  </script>
+</body>
+</html>

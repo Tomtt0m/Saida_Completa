@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Saída Completa</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Login</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="error-msg">
+          {% for message in messages %}
+            {{ message }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+      {{ form.hidden_tag() }}
+
+      <label for="nome">Usuário</label>
+      {{ form.nome(size=32) }}
+
+      <label for="senha">Senha</label>
+      {{ form.senha(size=32) }}
+
+      {{ form.submit(class="button") }}
+    </form>
+  </div>
+</body>
+</html>
