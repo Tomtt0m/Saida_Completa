@@ -87,8 +87,9 @@
       );
     });
 
-    function extrairDadosQRCode(codigo) {
+   function extrairDadosQRCode(codigo) {
   if (codigo.length !== 46) {
+    alert("QR Code inválido: deve ter 46 caracteres.");
     throw new Error("QR Code inválido: deve ter 46 caracteres.");
   }
 
@@ -107,6 +108,42 @@
     numero_caixa,
   };
 }
+
+function processarQRCode(codigo) {
+  let dados;
+  try {
+    dados = extrairDadosQRCode(codigo);
+  } catch (error) {
+    alert(error.message);
+    return;
+  }
+
+  dados.qr_code = codigo; // adiciona o código bruto no objeto
+
+  fetch("/registrar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dados)
+  })
+  .then(res => res.json())
+  .then(data => {
+    idSaida = data.id;
+    document.getElementById("registro_id").value = data.id;
+    document.getElementById("qr_code_raw").value = dados.qr_code;
+    document.getElementById("cliente").value = dados.cliente;
+    document.getElementById("produto").value = dados.produto;
+    document.getElementById("rota").value = dados.rota;
+    document.getElementById("pre_nota").value = dados.pre_nota;
+    document.getElementById("regiao_nome").value = dados.regiao_nome;
+    document.getElementById("numero_caixa").value = dados.numero_caixa;
+
+    formDados.style.display = "block";
+  })
+  .catch(err => {
+    alert("Erro ao registrar dados: " + err.message);
+  });
+}
+
 
       fetch("/registrar", {
         method: "POST",
@@ -169,5 +206,6 @@
   </script>
 </body>
 </html>
+
 
 
