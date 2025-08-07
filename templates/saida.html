@@ -88,21 +88,24 @@
     });
 
     function processarQRCode(codigo) {
-      const rota = codigo.substring(6, 10);
-      const pre_nota = codigo.substring(10, 16);
-      const regiao_cod = codigo.substring(24, 26);
-      const numero_caixa = codigo.substring(codigo.length - 4);
+  const rota = codigo.substring(11, 15);         // posições 12 a 15 base 1
+  const pre_nota = codigo.substring(15, 21);     // posições 16 a 21
+  const regiao_cod = codigo.substring(24, 26);   // posições 25 a 26
+  const data_raw = codigo.substring(26, 34);     // posições 27 a 34
+  const data_formatada = data_raw.slice(6,8) + "/" + data_raw.slice(4,6) + "/" + data_raw.slice(0,4);
+  const numero_caixa = codigo.substring(codigo.length - 4); // últimos 4 dígitos
 
-      const dados = {
-        qr_code: codigo,
-        rota,
-        pre_nota,
-        regiao_cod,
-        regiao_nome: regiao_cod === "18" ? "E DIRETA" : "DESCONHECIDA",
-        cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
-        produto: "CO PANTENE 510ML BIOTINAMINA B3",
-        numero_caixa
-      };
+  const dados = {
+    qr_code: codigo,
+    rota,
+    pre_nota,
+    regiao_cod,
+    regiao_nome: regiao_cod === "18" ? "E DIRETA" : "DESCONHECIDA",
+    cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
+    produto: "CO PANTENE 510ML BIOTINAMINA B3",
+    data: data_formatada,
+    numero_caixa
+  };
 
       fetch("/registrar", {
         method: "POST",
@@ -165,3 +168,4 @@
   </script>
 </body>
 </html>
+
