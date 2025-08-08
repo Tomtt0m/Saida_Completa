@@ -4,6 +4,7 @@ from forms import LoginForm
 from config import Config
 import os
 from datetime import datetime
+import jsonify
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -59,24 +60,35 @@ def saida():
         return redirect(url_for('login'))
     return render_template('saida.html', usuario=session['usuario_nome'])
 
-@app.route('/registrar', methods=['POST'])
+@app.route("/registrar", methods=["POST"])
 def registrar():
-    dados = request.json
-    s = SaidaCompleta(
-        usuario_id=session['usuario_id'],
-        qr_code_raw=dados['qr_code'],
-        rota=dados['rota'],
-        pre_nota=dados['pre_nota'],
-        regiao_cod=dados['regiao_cod'],
-        regiao_nome=dados['regiao_nome'],
-        cliente=dados['cliente'],
-        produto=dados['produto'],
-        numero_caixa=dados['numero_caixa'],
-        horario_leitura=datetime.now()
-    )
-    db.session.add(s)
-    db.session.commit()
-    return {'id': s.id}
+    try:
+        dados = request.get_json()
+
+        regiao_cod = dados.get("regiao_cod")
+        regiao_nome = dados.get("regiao_nome")
+        cliente = dados.get("cliente")
+        produto = dados.get("produto")
+        rota = dados.get("rota")
+        pre_nota = dados.get("pre_nota")
+        numero_caixa = dados.get("numero_caixa")
+
+        # Aqui você pode gravar no banco de dados
+        # Exemplo (simulação):
+        print(f"""
+        Cód Região: {regiao_cod}
+        Região: {regiao_nome}
+        Cliente: {cliente}
+        Produto: {produto}
+        Rota: {rota}
+        Pré-nota: {pre_nota}
+        Nº Caixa: {numero_caixa}
+        """)
+
+        return jsonify({"status": "sucesso", "mensagem": "Dados registrados com sucesso"}), 200
+
+    except Exception as e:
+        return jsonify({"status": "erro", "mensagem": str(e)}), 400
 
 @app.route('/upload/<int:id>', methods=['POST'])
 def upload(id):
