@@ -88,160 +88,69 @@
     });
 
    function extrairDadosQRCode(codigo) {
-  if (codigo.length !== 46) {
-    throw new Error("QR Code inválido: deve ter 46 caracteres.");
-  }
+    if (codigo.length !== 46) {
+        alert("QR Code inválido");
+        return null;
+    }
 
-  const rota = codigo.substring(11, 15);
-  const pre_nota = codigo.substring(15, 21);
-  const codigo_regiao = codigo.substring(24, 26);
-  const numero_caixa = codigo.substring(42, 46);
+    const rota = codigo.substring(11, 15);
+    const pre_nota = codigo.substring(15, 21);
+    const codigo_regiao = codigo.substring(24, 26);
+    const numero_caixa = codigo.substring(42, 46);
 
-  return {
-    rota,
-    pre_nota,
-    codigo_regiao,
-    regiao_nome: codigo_regiao === "18" ? "E DIRETA" : "DESCONHECIDA",
-    cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
-    produto: "CO PANTENE 510ML BIOTINAMINA B3",
-    numero_caixa,
-  };
+    return {
+        rota,
+        pre_nota,
+        regiao_cod: codigo_regiao,
+        regiao_nome: codigo_regiao === "18" ? "E DIRETA" : "DESCONHECIDA",
+        cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
+        produto: "CO PANTENE 510ML BIOTINAMINA B3",
+        numero_caixa
+    };
 }
 
-function processarQRCode(codigo) {
-  let dados;
-  try {
-    dados = extrairDadosQRCode(codigo);
-  } catch (error) {
-    alert(error.message);
-    return;
-  }
+function processarQRCode(qrCodeMessage) {
+    const dados = extrairDadosQRCode(qrCodeMessage);
+    if (!dados) return;
 
-  dados.qr_code = codigo; // adiciona o código bruto no objeto
+    document.getElementById("cod_regiao").textContent = dados.regiao_cod;
+    document.getElementById("regiao").textContent = dados.regiao_nome;
+    document.getElementById("cliente").textContent = dados.cliente;
+    document.getElementById("produto").textContent = dados.produto;
+    document.getElementById("rota").textContent = dados.rota;
+    document.getElementById("pre_nota").textContent = dados.pre_nota;
+    document.getElementById("numero_caixa").textContent = dados.numero_caixa;
 
-  fetch("/registrar", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(dados)
-  })
-  .then(res => res.json())
-  .then(data => {
-    idSaida = data.id;
-    document.getElementById("registro_id").value = data.id;
-    document.getElementById("qr_code_raw").value = dados.qr_code;
-    document.getElementById("cliente").value = dados.cliente;
-    document.getElementById("produto").value = dados.produto;
-    document.getElementById("rota").value = dados.rota;
-    document.getElementById("pre_nota").value = dados.pre_nota;
-    document.getElementById("regiao_nome").value = dados.regiao_nome;
-    document.getElementById("numero_caixa").value = dados.numero_caixa;
+    document.getElementById("resultado").style.display = "table";
 
-    formDados.style.display = "block";
-  })
-  .catch(err => {
-    alert("Erro ao registrar dados: " + err.message);
-  });
-}
-
-
-function processarQRCode(codigo) {
-  let dados;
-  try {
-    dados = extrairDadosQRCode(codigo);
-  } catch (error) {
-    alert(error.message);
-    return;
-  }
-
-  dados.qr_code = codigo; // adiciona o código bruto no objeto
-
-  fetch("/registrar", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(dados)
-  })
-  .then(res => res.json())
-  .then(data => {
-    idSaida = data.id;
-    document.getElementById("registro_id").value = data.id;
-    document.getElementById("qr_code_raw").value = dados.qr_code;
-    document.getElementById("cliente").value = dados.cliente;
-    document.getElementById("produto").value = dados.produto;
-    document.getElementById("rota").value = dados.rota;
-    document.getElementById("pre_nota").value = dados.pre_nota;
-    document.getElementById("regiao_nome").value = dados.regiao_nome;
-    document.getElementById("numero_caixa").value = dados.numero_caixa;
-
-    formDados.style.display = "block";
-  })
-  .catch(err => {
-    alert("Erro ao registrar dados: " + err.message);
-  });
-}
-
-
-      fetch("/registrar", {
+    fetch("/registrar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dados)
-      })
-      .then(res => res.json())
-      .then(data => {
-        idSaida = data.id;
-        document.getElementById("registro_id").value = data.id;
-        document.getElementById("qr_code_raw").value = dados.qr_code;
-        document.getElementById("cliente").value = dados.cliente;
-        document.getElementById("produto").value = dados.produto;
-        document.getElementById("rota").value = dados.rota;
-        document.getElementById("pre_nota").value = dados.pre_nota;
-        document.getElementById("regiao_nome").value = dados.regiao_nome;
-        document.getElementById("numero_caixa").value = dados.numero_caixa;
+    })
+    .then(res => res.json())
+    .then(data => console.log("Servidor respondeu:", data))
+    .catch(err => console.error("Erro ao enviar:", err));
+}
 
-        formDados.style.display = "block";
-      });
-    }
+function iniciarLeitor() {
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        qrCodeMessage => {
+            html5QrCode.stop().then(() => {
+                processarQRCode(qrCodeMessage);
+            });
+        },
+        errorMessage => { /* silencioso para não poluir o console */ }
+    ).catch(err => console.error("Erro ao iniciar leitor:", err));
+}
 
-    document.getElementById("foto_etiqueta").addEventListener("change", (e) => {
-      previewEtiqueta.src = URL.createObjectURL(e.target.files[0]);
-      previewEtiqueta.style.display = "block";
-    });
-
-    document.getElementById("foto_palete").addEventListener("change", (e) => {
-      previewPalete.src = URL.createObjectURL(e.target.files[0]);
-      previewPalete.style.display = "block";
-    });
-
-    document.getElementById("confirmar").addEventListener("click", () => {
-      const formData = new FormData();
-      const id = document.getElementById("registro_id").value;
-      formData.append("etiqueta", document.getElementById("foto_etiqueta").files[0]);
-      formData.append("palete", document.getElementById("foto_palete").files[0]);
-
-      const qtd = document.getElementById('quantidade').value;
-      if (!qtd || qtd <= 0) {
-        alert("Informe a quantidade de volumes.");
-        return;
-      }
-
-      fetch(`/volumes/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantidade: qtd })
-      })
-      .then(() => {
-        return fetch(`/upload/${id}`, { method: "POST", body: formData });
-      })
-      .then(() => {
-        return fetch(`/confirmar/${id}`, { method: "POST" });
-      })
-      .then(() => {
-        window.location.href = `/resumo/${id}`;
-      });
-    });
+window.onload = iniciarLeitor;
   </script>
 </body>
 </html>
-
 
 
 
