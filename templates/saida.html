@@ -89,7 +89,6 @@
 
    function extrairDadosQRCode(codigo) {
   if (codigo.length !== 46) {
-    alert("QR Code inválido: deve ter 46 caracteres.");
     throw new Error("QR Code inválido: deve ter 46 caracteres.");
   }
 
@@ -242,6 +241,7 @@ function processarQRCode(codigo) {
   </script>
 </body>
 </html>
+
 
 
 
