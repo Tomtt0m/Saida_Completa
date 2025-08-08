@@ -88,24 +88,24 @@
     });
 
    function extrairDadosQRCode(codigo) {
-    if (codigo.length !== 46) {
-        alert("QR Code inválido");
-        return null;
+    if (codigo.length !== 44) {
+      alert("QR Code inválido: deve ter 44 caracteres.");
+      throw new Error("QR Code inválido: deve ter 44 caracteres.");
     }
-
-    const rota = codigo.substring(11, 15);
-    const pre_nota = codigo.substring(15, 21);
-    const codigo_regiao = codigo.substring(24, 26);
-    const numero_caixa = codigo.substring(42, 46);
-
+  
+    const rota = codigo.substring(11, 15);       // posições 12 a 15
+    const pre_nota = codigo.substring(15, 21);   // posições 16 a 21
+    const codigo_regiao = codigo.substring(24, 26); // posições 25 a 26
+    const numero_caixa = codigo.substring(40, 44);  // posições 41 a 44
+  
     return {
-        rota,
-        pre_nota,
-        regiao_cod: codigo_regiao,
-        regiao_nome: codigo_regiao === "18" ? "E DIRETA" : "DESCONHECIDA",
-        cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
-        produto: "CO PANTENE 510ML BIOTINAMINA B3",
-        numero_caixa
+      rota,
+      pre_nota,
+      codigo_regiao,
+      regiao_nome: codigo_regiao === "18" ? "E DIRETA" : "DESCONHECIDA",
+      cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
+      produto: "CO PANTENE 510ML BIOTINAMINA B3",
+      numero_caixa,
     };
 }
 
@@ -151,6 +151,7 @@ window.onload = iniciarLeitor;
   </script>
 </body>
 </html>
+
 
 
 
