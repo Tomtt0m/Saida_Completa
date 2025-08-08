@@ -77,20 +77,17 @@
           qrbox: 250
         },
         qrCodeMessage => {
+          console.log("QR Code lido:", qrCodeMessage);
+          console.log("Tamanho do código:", qrCodeMessage.length);
           scanner.stop();
           qrReader.style.display = "none";
-          processarQRCode(qrCodeMessage);
+          processarQRCode(qrCodeMessage.trim()); // tira espaços extras só pra garantir
         },
-        errorMessage => {
-          console.log("Erro leitura:", errorMessage);
-        }
-      );
-    });
 
    function extrairDadosQRCode(codigo) {
-    if (codigo.length !== 44) {
-      alert("QR Code inválido: deve ter 44 caracteres.");
-      throw new Error("QR Code inválido: deve ter 44 caracteres.");
+    if (codigo.length < 44) {
+      alert("QR Code inválido: tamanho insuficiente.");
+      throw new Error("QR Code inválido: tamanho insuficiente.");
     }
   
     const rota = codigo.substring(11, 15);       // posições 12 a 15
@@ -151,6 +148,7 @@ window.onload = iniciarLeitor;
   </script>
 </body>
 </html>
+
 
 
 
