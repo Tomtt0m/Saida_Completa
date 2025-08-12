@@ -68,19 +68,19 @@
 
     // Função para extrair dados do QR Code
     function extrairDadosQRCode(codigo) {
-      const rota = codigo.substring(10, 14);          // posições 11 a 14 (índices 10 a 13)
+      const rota = codigo.substring(09, 13);          // posições 11 a 14 (índices 10 a 13)
       const pre_nota = codigo.substring(14, 20);      // posições 15 a 20 (índices 14 a 19)
-      const codigo_regiao = codigo.substring(24, 26); // posições 25 a 26 (índices 24 a 25)
-      const numero_caixa = codigo.substring(38, 42);  // posições 39 a 42 (índices 38 a 41)
+      const codigo_regiao = codigo.substring(27, 29); // posições 25 a 26 (índices 24 a 25)
+      const numero_caixa = codigo.substring(36, 40);  // posições 39 a 42 (índices 38 a 41)
 
   return {
     qr_code_raw: codigo,
     rota,
     pre_nota,
     codigo_regiao,
-    regiao_nome: codigo_regiao === "18" ? "E DIRETA" : "DESCONHECIDA",
-    cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
-    produto: "CO PANTENE 510ML BIOTINAMINA B3",
+    regiao_nome: "",
+    cliente: "",
+    produto: "",
     numero_caixa,
   };
 }
@@ -173,6 +173,7 @@
   </script>
 </body>
 </html>
+
 
 
 
