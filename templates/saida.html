@@ -22,9 +22,6 @@
       <label>QR Code:</label>
       <input type="text" id="qr_code_raw" disabled>
 
-      <label>Cliente:</label>
-      <input type="text" id="cliente" disabled>
-
       <label>Produto:</label>
       <input type="text" id="produto" disabled>
 
@@ -79,7 +76,6 @@
     pre_nota,
     codigo_regiao,
     regiao_nome: "",
-    cliente: "",
     produto: "",
     numero_caixa,
   };
@@ -88,7 +84,6 @@
     // Preenche campos do formulário com os dados
     function preencherFormulario(dados) {
       document.getElementById("qr_code_raw").value = dados.qr_code_raw;
-      document.getElementById("cliente").value = dados.cliente;
       document.getElementById("produto").value = dados.produto;
       document.getElementById("rota").value = dados.rota;
       document.getElementById("pre_nota").value = dados.pre_nota;
@@ -173,6 +168,7 @@
   </script>
 </body>
 </html>
+
 
 
 
