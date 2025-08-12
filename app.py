@@ -1,10 +1,9 @@
-from flask import Flask, render_template, redirect, url_for, request, session, flash
+from flask import Flask, render_template, redirect, url_for, request, session, flash, jsonify
 from models import db, Usuario, SaidaCompleta
 from forms import LoginForm
 from config import Config
 import os
 from datetime import datetime
-import jsonify
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -62,28 +61,62 @@ def saida():
 
 @app.route("/registrar", methods=["POST"])
 def registrar():
+    if 'usuario_id' not in session:
+        return jsonify({"status": "erro", "mensagem": "Usuário não autenticado"}), 401
+
     try:
-        dados = request.get_json()
+        # Captura campos do formulário
+        qr_code_raw = request.form.get("qr_code_raw")
+        rota = request.form.get("rota")
+        pre_nota = request.form.get("pre_nota")
+        codigo_regiao = request.form.get("regiao_cod")  # manter nome igual ao HTML
+        regiao_nome = request.form.get("regiao_nome")
+        cliente = request.form.get("cliente")
+        produto = request.form.get("produto")
+        numero_caixa = request.form.get("numero_caixa")
+        quantidade = request.form.get("quantidade")
 
-        regiao_cod = dados.get("regiao_cod")
-        regiao_nome = dados.get("regiao_nome")
-        cliente = dados.get("cliente")
-        produto = dados.get("produto")
-        rota = dados.get("rota")
-        pre_nota = dados.get("pre_nota")
-        numero_caixa = dados.get("numero_caixa")
+        # Captura arquivos
+        foto_etiqueta = request.files.get("foto_etiqueta")
+        foto_palete = request.files.get("foto_palete")
 
-        # Aqui você pode gravar no banco de dados
-        # Exemplo (simulação):
-        print(f"""
-        Cód Região: {regiao_cod}
-        Região: {regiao_nome}
-        Cliente: {cliente}
-        Produto: {produto}
-        Rota: {rota}
-        Pré-nota: {pre_nota}
-        Nº Caixa: {numero_caixa}
-        """)
+        # Pasta de uploads
+        upload_folder = app.config.get('UPLOAD_FOLDER', 'static/uploads')
+        os.makedirs(upload_folder, exist_ok=True)
+
+        foto_etiqueta_path = None
+        foto_palete_path = None
+
+        if foto_etiqueta:
+            foto_etiqueta_path = os.path.join(upload_folder, f"etiqueta_{numero_caixa}.jpg")
+            foto_etiqueta.save(foto_etiqueta_path)
+            foto_etiqueta_path = f"static/uploads/etiqueta_{numero_caixa}.jpg"  # caminho relativo
+
+        if foto_palete:
+            foto_palete_path = os.path.join(upload_folder, f"palete_{numero_caixa}.jpg")
+            foto_palete.save(foto_palete_path)
+            foto_palete_path = f"static/uploads/palete_{numero_caixa}.jpg"  # caminho relativo
+
+        # Cria novo registro no banco
+        saida = SaidaCompleta(
+            usuario_id=session.get('usuario_id'),
+            qr_code_raw=qr_code_raw,
+            rota=rota,
+            pre_nota=pre_nota,
+            regiao_cod=codigo_regiao,
+            regiao_nome=regiao_nome,
+            cliente=cliente,
+            produto=produto,
+            numero_caixa=numero_caixa,
+            quantidade_volumes=quantidade,
+            horario_leitura=datetime.now(),
+            horario_foto_1=datetime.now() if foto_etiqueta_path else None,
+            horario_foto_2=datetime.now() if foto_palete_path else None,
+            foto_etiqueta=foto_etiqueta_path,
+            foto_palete=foto_palete_path
+        )
+        db.session.add(saida)
+        db.session.commit()
 
         return jsonify({"status": "sucesso", "mensagem": "Dados registrados com sucesso"}), 200
 
@@ -99,12 +132,12 @@ def upload(id):
     if etiqueta:
         path = os.path.join(app.config['UPLOAD_FOLDER'], f'etiqueta_{id}.jpg')
         etiqueta.save(path)
-        s.foto_etiqueta = path
+        s.foto_etiqueta = f"static/uploads/etiqueta_{id}.jpg"
         s.horario_foto_1 = datetime.now()
     if palete:
         path = os.path.join(app.config['UPLOAD_FOLDER'], f'palete_{id}.jpg')
         palete.save(path)
-        s.foto_palete = path
+        s.foto_palete = f"static/uploads/palete_{id}.jpg"
         s.horario_foto_2 = datetime.now()
 
     db.session.commit()
@@ -129,7 +162,6 @@ def volumes(id):
     s.quantidade_volumes = dados['quantidade']
     db.session.commit()
     return 'OK'
-
 
 if __name__ == '__main__':
     criar_banco()
