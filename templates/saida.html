@@ -70,7 +70,7 @@
     function extrairDadosQRCode(codigo) {
       const rota = codigo.substring(09, 13);          // posições 11 a 14 (índices 10 a 13)
       const pre_nota = codigo.substring(14, 20);      // posições 15 a 20 (índices 14 a 19)
-      const codigo_regiao = codigo.substring(27, 29); // posições 25 a 26 (índices 24 a 25)
+      const codigo_regiao = codigo.substring(26, 28); // posições 25 a 26 (índices 24 a 25)
       const numero_caixa = codigo.substring(36, 40);  // posições 39 a 42 (índices 38 a 41)
 
   return {
@@ -173,6 +173,7 @@
   </script>
 </body>
 </html>
+
 
 
 
