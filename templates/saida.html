@@ -64,93 +64,117 @@
     const previewPalete = document.getElementById("preview_palete");
 
     let scanner;
-    let idSaida = null;
+    let dadosQRCode = null; // Guarda dados lidos até confirmar
 
+    // Função para extrair dados do QR Code
+    function extrairDadosQRCode(codigo) {
+      if (codigo.length < 44) {
+        alert("QR Code inválido: tamanho insuficiente.");
+        throw new Error("QR Code inválido: tamanho insuficiente.");
+      }
+
+      const rota = codigo.substring(11, 15);
+      const pre_nota = codigo.substring(15, 21);
+      const codigo_regiao = codigo.substring(24, 26);
+      const numero_caixa = codigo.substring(40, 44);
+
+      return {
+        qr_code_raw: codigo,
+        rota,
+        pre_nota,
+        codigo_regiao,
+        regiao_nome: codigo_regiao === "18" ? "E DIRETA" : "DESCONHECIDA",
+        cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
+        produto: "CO PANTENE 510ML BIOTINAMINA B3",
+        numero_caixa,
+      };
+    }
+
+    // Preenche campos do formulário com os dados
+    function preencherFormulario(dados) {
+      document.getElementById("qr_code_raw").value = dados.qr_code_raw;
+      document.getElementById("cliente").value = dados.cliente;
+      document.getElementById("produto").value = dados.produto;
+      document.getElementById("rota").value = dados.rota;
+      document.getElementById("pre_nota").value = dados.pre_nota;
+      document.getElementById("regiao_nome").value = dados.regiao_nome;
+      document.getElementById("numero_caixa").value = dados.numero_caixa;
+    }
+
+    // Iniciar leitura ao clicar no botão
     startScanBtn.addEventListener("click", () => {
       qrReader.style.display = "block";
       scanner = new Html5Qrcode("qr-reader");
 
       scanner.start(
         { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: 250
-        },
-        qrCodeMessage => {
-          console.log("QR Code lido:", qrCodeMessage);
-          console.log("Tamanho do código:", qrCodeMessage.length);
-          scanner.stop();
-          qrReader.style.display = "none";
-          processarQRCode(qrCodeMessage.trim()); // tira espaços extras só pra garantir
-        },
-
-   function extrairDadosQRCode(codigo) {
-    if (codigo.length < 44) {
-      alert("QR Code inválido: tamanho insuficiente.");
-      throw new Error("QR Code inválido: tamanho insuficiente.");
-    }
-  
-    const rota = codigo.substring(11, 15);       // posições 12 a 15
-    const pre_nota = codigo.substring(15, 21);   // posições 16 a 21
-    const codigo_regiao = codigo.substring(24, 26); // posições 25 a 26
-    const numero_caixa = codigo.substring(40, 44);  // posições 41 a 44
-  
-    return {
-      rota,
-      pre_nota,
-      codigo_regiao,
-      regiao_nome: codigo_regiao === "18" ? "E DIRETA" : "DESCONHECIDA",
-      cliente: "707 AUTO – SERVIÇO DE ALIMENTOS",
-      produto: "CO PANTENE 510ML BIOTINAMINA B3",
-      numero_caixa,
-    };
-}
-
-function processarQRCode(qrCodeMessage) {
-    const dados = extrairDadosQRCode(qrCodeMessage);
-    if (!dados) return;
-
-    document.getElementById("cod_regiao").textContent = dados.regiao_cod;
-    document.getElementById("regiao").textContent = dados.regiao_nome;
-    document.getElementById("cliente").textContent = dados.cliente;
-    document.getElementById("produto").textContent = dados.produto;
-    document.getElementById("rota").textContent = dados.rota;
-    document.getElementById("pre_nota").textContent = dados.pre_nota;
-    document.getElementById("numero_caixa").textContent = dados.numero_caixa;
-
-    document.getElementById("resultado").style.display = "table";
-
-    fetch("/registrar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados)
-    })
-    .then(res => res.json())
-    .then(data => console.log("Servidor respondeu:", data))
-    .catch(err => console.error("Erro ao enviar:", err));
-}
-
-function iniciarLeitor() {
-    const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-        { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         qrCodeMessage => {
-            html5QrCode.stop().then(() => {
-                processarQRCode(qrCodeMessage);
-            });
-        },
-        errorMessage => { /* silencioso para não poluir o console */ }
-    ).catch(err => console.error("Erro ao iniciar leitor:", err));
-}
+          console.log("QR Code lido:", qrCodeMessage);
+          scanner.stop();
+          qrReader.style.display = "none";
 
-window.onload = iniciarLeitor;
+          dadosQRCode = extrairDadosQRCode(qrCodeMessage.trim());
+          preencherFormulario(dadosQRCode);
+
+          formDados.style.display = "block";
+        },
+        errorMessage => { /* ignora erros de leitura */ }
+      )
+      .catch(err => console.error("Erro ao iniciar scanner:", err));
+    });
+
+    // Clique no botão confirmar envia dados para o servidor
+    document.getElementById("confirmar").addEventListener("click", () => {
+      if (!dadosQRCode) {
+        alert("Nenhum QR Code lido ainda!");
+        return;
+      }
+
+      // Adiciona quantidade ao objeto
+      dadosQRCode.quantidade = document.getElementById("quantidade").value;
+
+      // Cria um objeto FormData para enviar inclusive as imagens
+      const formData = new FormData();
+      for (const key in dadosQRCode) {
+        formData.append(key, dadosQRCode[key]);
+      }
+      formData.append("foto_etiqueta", document.getElementById("foto_etiqueta").files[0]);
+      formData.append("foto_palete", document.getElementById("foto_palete").files[0]);
+
+      fetch("/registrar", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Servidor respondeu:", data);
+        alert("Registro enviado com sucesso!");
+        formDados.reset();
+        formDados.style.display = "none";
+      })
+      .catch(err => {
+        console.error("Erro ao enviar:", err);
+        alert("Erro ao enviar os dados!");
+      });
+    });
+
+    // Pré-visualização das fotos
+    document.getElementById("foto_etiqueta").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (file) {
+        previewEtiqueta.src = URL.createObjectURL(file);
+        previewEtiqueta.style.display = "block";
+      }
+    });
+
+    document.getElementById("foto_palete").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (file) {
+        previewPalete.src = URL.createObjectURL(file);
+        previewPalete.style.display = "block";
+      }
+    });
   </script>
 </body>
 </html>
-
-
-
-
-
-
