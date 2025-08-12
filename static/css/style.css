@@ -49,6 +49,7 @@ form {
 
 input[type="text"],
 input[type="password"],
+input[type="number"],
 input[type="file"],
 select {
   width: 100%;
@@ -146,3 +147,4 @@ label {
 .button:hover {
   background-color: #0050b3; /* Tom mais claro ao passar o mouse */
 }
+
